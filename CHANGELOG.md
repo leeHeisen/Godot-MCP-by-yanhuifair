@@ -1,4 +1,20 @@
 # Changelog
+## v1.12.3 (2026-09-28)
+
+Fixed — addon failed to load on some Godot versions
+
+- `addons/godot-mcp/plugin.gd` called `EditorInterface.get_unsaved_scenes()` and
+  `EditorInterface.close_scene()` directly. Those methods are not present in every
+  Godot 4.x build, and GDScript resolves a missing method on a singleton class as a
+  *static* lookup — so the script failed to **parse** with
+  `Static function "get_unsaved_scenes()" not found in base "GDScriptNativeClass"`
+  and the whole addon refused to load. The `has_method(...)` guard could not help
+  because the error is raised at parse time, before any code runs.
+- Both calls now go through `EditorInterface.call("...")`, which is a universal
+  `Object` method and parses on every Godot 4.x. The existing `has_method` guard
+  still skips the call at runtime when the method is absent, so the feature degrades
+  gracefully (returns an error dict / omits the field) instead of crashing the load.
+
 ## v1.12.2 (2026-09-21)
 
 Internal cleanup release: dev tooling plus a de-duplication pass. No tool was added or removed and no
