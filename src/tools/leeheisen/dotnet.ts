@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — Godot .NET / C# tooling (funplay parity)
@@ -65,7 +66,7 @@ function findDotnetProjectFiles(projectRoot: string): { csproj: string[]; sln: s
 function readTargetFramework(projectRoot: string, csprojRel: string): string {
   try {
     const content = readTextFile(resolveProjectPath(projectRoot, csprojRel)).content;
-    const m = content.match(/<TargetFramework[s]?>([^<]+)</);
+    const m = content.match(/<TargetFrameworks?>([^<]+)</);
     return m ? m[1].trim() : 'unknown';
   } catch {
     return 'unknown';

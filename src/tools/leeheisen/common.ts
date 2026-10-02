@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — shared helpers

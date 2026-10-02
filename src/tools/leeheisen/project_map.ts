@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — project map + scene complexity (funplay parity)
@@ -51,10 +52,10 @@ function extractCSharp(content: string): ScriptSymbols {
       out.class_name = m[1];
       if (m[2]) out.extends = m[2];
     }
-    if ((m = line.match(/^(?:public|private|protected|internal)\s+(?:static\s+|virtual\s+|override\s+|async\s+|sealed\s+)*[\w<>\[\],.?]+\s+([A-Za-z_]\w*)\s*\(/))) {
+    if ((m = line.match(/^(?:public|private|protected|internal)\s+(?:static\s+|virtual\s+|override\s+|async\s+|sealed\s+)*[\w<>[\].,?]+\s+([A-Za-z_]\w*)\s*\(/))) {
       out.functions.push(m[1]);
     }
-    if ((m = line.match(/^\s*(?:public|private|protected|internal)\s+[\w<>\[\],.?]+\s+([A-Za-z_]\w*)\s*\{\s*get;/))) {
+    if ((m = line.match(/^\s*(?:public|private|protected|internal)\s+[\w<>[\].,?]+\s+([A-Za-z_]\w*)\s*\{\s*get;/))) {
       out.exports.push(m[1]);
     }
   }
@@ -279,7 +280,7 @@ function analyseSceneFile(projectRoot: string, rel: string, topTypes: number) {
   const scriptCount = doc.extResources.filter((e) => e.type === 'Script').length;
   // Weighted heuristic: structure depth and wiring cost more than raw node count.
   const complexityScore = Math.round(
-    nodeCount * 1 + connectionCount * 2 + maxDepth * 3 + distinctTypes * 0.5 + scriptCount * 1.5
+    nodeCount + connectionCount * 2 + maxDepth * 3 + distinctTypes * 0.5 + scriptCount * 1.5
   );
   const rating = complexityScore < 40 ? 'low' : complexityScore < 120 ? 'moderate' : complexityScore < 300 ? 'high' : 'very_high';
 
