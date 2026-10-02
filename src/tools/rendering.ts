@@ -9,7 +9,7 @@ import { toolError, ErrorCode } from '../utils/errors.js';
 import { forEachScene } from '../utils/scene_files.js';
 import { collectNodes } from '../utils/scene_walk.js';
 import { ToolResult } from '../utils/types.js';
-import { readTextFile, resolveProjectPath, findFilesByExtension, writeTextFile, toResPath } from '../utils/file_utils.js';
+import { readTextFile, resolveProjectPath, writeTextFile, toResPath } from '../utils/file_utils.js';
 import { parseScene, serializeScene } from '../parsers/scene_parser.js';
 
 // ---- Schemas ----
@@ -280,9 +280,6 @@ export function handleReadRaycast(
     const rayTypes = ['RayCast2D', 'RayCast3D', 'ShapeCast2D', 'ShapeCast3D'];
     const targetTypes = args.ray_type ? [args.ray_type] : rayTypes;
 
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const rays: { scene: string; name: string; type: string; enabled: string; target: string }[] = [];
 

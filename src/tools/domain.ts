@@ -9,7 +9,7 @@ import { toolError, ErrorCode } from '../utils/errors.js';
 import { forEachScene } from '../utils/scene_files.js';
 import { collectNodes } from '../utils/scene_walk.js';
 import { ToolResult } from '../utils/types.js';
-import { readTextFile, resolveProjectPath, findFilesByExtension, writeTextFile } from '../utils/file_utils.js';
+import { readTextFile, resolveProjectPath, writeTextFile } from '../utils/file_utils.js';
 import { parseResource } from '../parsers/resource_parser.js';
 import { parseScene, serializeScene } from '../parsers/scene_parser.js';
 
@@ -243,9 +243,6 @@ export function handleListPaths(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const paths: { scene: string; name: string; type: string; pointCount: string }[] = [];
 
@@ -310,9 +307,6 @@ export function handleListSkeletons(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const skeletons: { scene: string; name: string; boneCount: string }[] = [];
 
@@ -383,9 +377,6 @@ export function handleReadReflectionProbe(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const probes: { scene: string; name: string; type: string; size: string; update: string }[] = [];
 
@@ -420,9 +411,6 @@ export function handleReadMultiMesh(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const multis: { scene: string; name: string; type: string; count: string }[] = [];
 

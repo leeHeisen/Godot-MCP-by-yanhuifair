@@ -1,4 +1,23 @@
 # Changelog
+## v1.12.4 (2026-10-02)
+
+Added — addon self-update on project open
+
+- The editor plugin now detects a stale addon automatically. When a Godot project
+  opens (the plugin loads / the bridge connects), `plugin.gd` reports its own
+  `PLUGIN_VERSION` and `Engine.get_version_info()` to the MCP server.
+- The server compares its bundled addon with the one in the project **by content**
+  (SHA-1, not version string) via `src/utils/addon_sync.ts`, and, if they differ,
+  overwrites the project's `addons/godot-mcp` with the server's copy — the same
+  logic `scripts/sync-addons.js` uses. It also syncs once at startup
+  (`initEditorBridge`), so even an addon that currently fails to parse gets fixed on
+  disk before the next editor launch.
+- After a sync that changed files, the server sends a `reload_addon` command; the
+  plugin best-effort reloads itself (disable → re-enable via
+  `EditorInterface.call("set_plugin_enabled", ...)`) and shows a toast. This means
+  you can no longer get stuck on a broken older addon: opening the project pulls the
+  matching, fixed addon from the running server.
+
 ## v1.12.3 (2026-09-28)
 
 Fixed — addon failed to load on some Godot versions

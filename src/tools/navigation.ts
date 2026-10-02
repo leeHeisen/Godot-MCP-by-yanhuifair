@@ -11,7 +11,7 @@ import { toolError, ErrorCode } from '../utils/errors.js';
 import { forEachScene } from '../utils/scene_files.js';
 import { forEachNode } from '../utils/scene_walk.js';
 import { ToolResult } from '../utils/types.js';
-import { readTextFile, resolveProjectPath, findFilesByExtension, writeTextFile } from '../utils/file_utils.js';
+import { readTextFile, resolveProjectPath, writeTextFile } from '../utils/file_utils.js';
 import { parseScene, serializeScene } from '../parsers/scene_parser.js';
 
 // ---- Tool Schemas ----
@@ -40,9 +40,6 @@ export function handleListNavRegions(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const regions: { scene: string; name: string; type: string; baked: boolean }[] = [];
     const navMeshRefs: { scene: string; name: string; meshPath: string }[] = [];

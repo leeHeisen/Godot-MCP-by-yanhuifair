@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { toolError, ErrorCode } from '../utils/errors.js';
 import { forEachScene } from '../utils/scene_files.js';
 import { ToolResult } from '../utils/types.js';
-import { resolveProjectPath, findFilesByExtension, readTextFile, writeTextFile } from '../utils/file_utils.js';
+import { resolveProjectPath, readTextFile, writeTextFile } from '../utils/file_utils.js';
 import { parseScene, serializeScene } from '../parsers/scene_parser.js';
 
 // ---- Tool Schemas ----
@@ -66,9 +66,6 @@ export function handleListCameras(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const cameras: { scene: string; name: string; type: string; current: boolean }[] = [];
 
@@ -175,9 +172,6 @@ export function handleListLights(
   args: { scene_path?: string; light_type?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const allLightTypes = [...LIGHT_TYPES_3D, ...LIGHT_TYPES_2D];
     const targetTypes = args.light_type
@@ -255,9 +249,6 @@ export function handleReadParticles(
   args: { scene_path?: string; particle_type?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path
-      ? [args.scene_path]
-      : findFilesByExtension(projectRoot, ['.tscn']);
 
     const targetTypes = args.particle_type
       ? [args.particle_type]

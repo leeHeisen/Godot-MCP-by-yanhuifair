@@ -48,7 +48,6 @@ export function handleListAllSignals(
   args: { scene_path?: string; signal_name?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const allConns: { scene: string; signal: string; from: string; to: string; method: string }[] = [];
 
@@ -223,7 +222,6 @@ export function handleListPopups(
 ): ToolResult {
   try {
     const types = ['Popup', 'PopupMenu', 'PopupPanel', 'Window', 'AcceptDialog', 'ConfirmationDialog', 'FileDialog'];
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const popups: { scene: string; name: string; type: string; visible: string }[] = [];
 

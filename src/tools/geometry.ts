@@ -92,7 +92,6 @@ export function handleSetShapePoints(
     const doc = parseScene(content);
 
     // Find the node（按路径查找；同名兄弟节点的容错由 findNodeByPath 负责）
-    const pathParts = args.node_path.split('/').filter(Boolean);
     const node = findNodeByPath(doc.nodes, args.node_path);
     if (!node) {
     return toolError(ErrorCode.FILE_NOT_FOUND, `Node "${args.node_path}" not found`);

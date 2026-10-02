@@ -11,7 +11,7 @@ import { toolError, ErrorCode } from '../utils/errors.js';
 import { forEachScene } from '../utils/scene_files.js';
 import { collectNodes } from '../utils/scene_walk.js';
 import { ToolResult } from '../utils/types.js';
-import { readTextFile, resolveProjectPath, findFilesByExtension } from '../utils/file_utils.js';
+import { readTextFile, resolveProjectPath } from '../utils/file_utils.js';
 import { parseScene } from '../parsers/scene_parser.js';
 
 // ---- Schemas ----
@@ -124,7 +124,6 @@ export function handleReadAnimatedSprite(
 ): ToolResult {
   try {
     const types = ['AnimatedSprite2D', 'AnimatedSprite3D'];
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const sprites: { scene: string; name: string; type: string; anim: string; frame: string }[] = [];
 
@@ -192,7 +191,6 @@ export function handleReadAudioPlayer(
 ): ToolResult {
   try {
     const types = ['AudioStreamPlayer', 'AudioStreamPlayer2D', 'AudioStreamPlayer3D'];
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const players: { scene: string; name: string; type: string; stream: string; playing: string }[] = [];
 
@@ -230,7 +228,6 @@ export function handleReadVideoPlayer(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const players: { scene: string; name: string; stream: string; loop: string }[] = [];
 
@@ -261,7 +258,6 @@ export function handleReadParallax(
   args: { scene_path?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const bgs: { scene: string; name: string; layers: number }[] = [];
 
@@ -312,7 +308,6 @@ export function handleReadRichText(
   args: { scene_path?: string; name?: string }
 ): ToolResult {
   try {
-    const sceneFiles = args.scene_path ? [args.scene_path] : findFilesByExtension(projectRoot, ['.tscn']);
 
     const labels: { scene: string; name: string; bbcode: string; fit: string }[] = [];
 

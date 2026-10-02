@@ -17,6 +17,7 @@ import net from 'node:net';
 import { spawn, ChildProcess } from 'node:child_process';
 import { editorCommandError } from '../utils/errors.js';
 import { findGodotBinary } from '../utils/godot_cli.js';
+import { syncAddonToProject } from '../utils/addon_sync.js';
 
 const EDITOR_PORT = 9876;
 const TCP_CONNECT_TIMEOUT = 800;   // quick probe for an existing editor on 127.0.0.1
@@ -105,6 +106,12 @@ function getTcpConnection(): Promise<net.Socket> {
           if (!line) continue;
           try {
             const response = JSON.parse(line);
+            // 插件主动发来的请求/通知（如 request_addon_update）不带匹配的 pending id，
+            // 由 method 字段识别并分发；server→plugin 的命令不会被当成响应处理。
+            if (typeof response.method === 'string') {
+              handlePluginRequest(response);
+              continue;
+            }
             const pending = _tcpPending.get(response.id);
             if (pending) {
               _tcpPending.delete(response.id);
@@ -258,6 +265,11 @@ function ensureEditorProcess(): ChildProcess {
       if (line.startsWith(RESPONSE_MARKER)) {
         try {
           const json = JSON.parse(line.substring(RESPONSE_MARKER.length));
+          // 插件主动发来的请求/通知（如 request_addon_update）按 method 分发
+          if (typeof json.method === 'string') {
+            handlePluginRequest(json);
+            continue;
+          }
           const resolver = _pendingRequests.get(json.id);
           if (resolver) {
             _pendingRequests.delete(json.id);
@@ -336,10 +348,42 @@ function sendViaSpawn(method: string, params: Record<string, any> = {}): Promise
   });
 }
 
+/**
+ * 处理插件主动发来的消息（如 request_addon_update）。
+ * 这类消息不带匹配的 pending id，由这里的 method 字段识别并分发。
+ */
+function handlePluginRequest(msg: any): void {
+  if (!msg || msg.method !== 'request_addon_update') return;
+  if (!_projectRoot) return;
+  try {
+    const res = syncAddonToProject(_projectRoot);
+    if (res.updated) {
+      console.log(`[Godot MCP] Addon updated to v${res.version} (${res.reason}) — reloading editor plugin`);
+      // 文件已写入磁盘，让运行中的插件实例重新加载以生效
+      sendEditorCommand('reload_addon', { from: msg?.params?.plugin_version ?? '', to: res.version })
+        .catch((e) => console.error('[Godot MCP] reload_addon command failed:', (e as Error).message));
+    } else {
+      console.log(`[Godot MCP] Addon already up to date (v${res.version})`);
+    }
+  } catch (e) {
+    console.error('[Godot MCP] Addon sync failed:', (e as Error).message);
+  }
+}
+
 /** Initialize the editor bridge with the project root. Call once on startup. */
 export function initEditorBridge(projectRoot: string): void {
   _projectRoot = projectRoot;
   _restartAttempts = 0;
+  // 启动即把 bundled addon 同步到工程：即使插件当前因旧版本无法加载，
+  // 磁盘上的 addon 也会被修正，下次打开工程即生效（self-update 的安全网）。
+  try {
+    const res = syncAddonToProject(projectRoot);
+    if (res.updated) {
+      console.log(`[Godot MCP] Addon synced to v${res.version} on startup (${res.reason})`);
+    }
+  } catch (e) {
+    console.error('[Godot MCP] Startup addon sync failed:', (e as Error).message);
+  }
 }
 
 /** Shut down the editor process gracefully */

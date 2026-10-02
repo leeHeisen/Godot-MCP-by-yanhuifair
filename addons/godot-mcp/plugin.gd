@@ -5,7 +5,7 @@ extends EditorPlugin
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 # ============================================================
-# Godot MCP Editor Plugin v1.12.3
+# Godot MCP Editor Plugin v1.12.4
 # ============================================================
 # ⚠️  Godot 4.x only. Godot 3 is NOT supported.
 # Dual-mode communication with the MCP server:
@@ -20,7 +20,7 @@ const DEFAULT_PORT = 9876
 const MAX_OUTPUT_LINES = 500
 const BUFFER_SIZE = 65536
 const RESPONSE_MARKER = "__MCP__:"
-const PLUGIN_VERSION = "1.12.3"
+const PLUGIN_VERSION = "1.12.4"
 
 # TCP 接收缓冲上限：超过且无完整行时丢弃，防止恶意客户端灌数据撑爆内存
 const TCP_BUFFER_LIMIT = 1024 * 1024
@@ -59,6 +59,7 @@ func _enter_tree() -> void:
 	if _stdio_mode:
 		_start_stdin_reader()
 		_send_stdout({"jsonrpc": "2.0", "id": 0, "result": {"ready": true, "version": PLUGIN_VERSION}})
+		_request_addon_update()
 	else:
 		_start_tcp_server()
 
@@ -185,6 +186,7 @@ func _process_tcp() -> void:
 			_peer_authenticated = _auth_token == ""
 			_peer.poll()
 			print("[Godot MCP] TCP client connected (auth: ", "on" if _auth_token != "" else "off", ")")
+			_request_addon_update()
 
 	# Read and handle messages
 	if _peer:
@@ -275,7 +277,7 @@ func _handle_message(raw: String) -> void:
 func _execute_command(method: String, params: Dictionary) -> Dictionary:
 	match method:
 		# ---- Health Check ----
-		"health_check": return {"ok": true, "version": PLUGIN_VERSION, "commands": 116, "undo_support": true}
+		"health_check": return {"ok": true, "version": PLUGIN_VERSION, "commands": 117, "undo_support": true}
 
 		# ---- Editor State ----
 		"get_open_scene": return _cmd_get_open_scene()
@@ -397,6 +399,7 @@ func _execute_command(method: String, params: Dictionary) -> Dictionary:
 		"get_plugin_list": return _cmd_get_plugin_list()
 		"enable_plugin": return _cmd_enable_plugin(params)
 		"disable_plugin": return _cmd_disable_plugin(params)
+		"reload_addon": return _cmd_reload_addon(params)
 
 		# ---- Class Introspection ----
 		"get_class_list": return _cmd_get_class_list(params)
@@ -1991,6 +1994,46 @@ func _cmd_enable_plugin(params: Dictionary) -> Dictionary:
 func _cmd_disable_plugin(params: Dictionary) -> Dictionary:
 	var p = params.get("plugin", ""); if not p: return {"error": "Missing plugin name"}
 	EditorInterface.set_plugin_enabled(p, false); return {"ok": true, "plugin": p}
+
+# 插件自更新：server 把 addon 文件同步到磁盘后，发 reload_addon 让本实例重新加载。
+func _cmd_reload_addon(params: Dictionary) -> Dictionary:
+	var to_version = str(params.get("to", ""))
+	_reload_self()
+	var msg = "Godot MCP addon updated"
+	if to_version != "":
+		msg += " to v" + to_version
+	msg += " — reloading editor plugin"
+	_cmd_show_toast({"message": msg, "severity": "info", "tooltip": "If the editor misbehaves, restart it to finish applying the update."})
+	return {"ok": true, "reloaded": true, "version": to_version}
+
+# 最佳努力：在同一工程内重载本插件，使本次运行的代码生效。
+# 文件已由 server 侧 sync 写入磁盘；这里只负责让运行中的实例重新加载脚本。
+func _reload_self() -> void:
+	var plugin_name = "godot-mcp"
+	var ei = get_editor_interface()
+	if ei == null or not ei.has_method("set_plugin_enabled"):
+		return
+	# 先关后开，触发 Godot 重新加载脚本。两调用都经 EditorInterface.call，
+	# 跨 Godot 版本安全（直接调用 set_plugin_enabled 在缺该方法的版本上解析期即崩）。
+	ei.call("set_plugin_enabled", plugin_name, false)
+	# 延迟一帧再开启，避免同帧内状态竞态
+	await get_tree().process_frame
+	ei.call("set_plugin_enabled", plugin_name, true)
+
+# 工程打开 / 连接建立时，向 server 上报本插件版本与 Godot 版本，触发 self-update 检查。
+func _request_addon_update() -> void:
+	var payload = {
+		"jsonrpc": "2.0",
+		"method": "request_addon_update",
+		"params": {
+			"plugin_version": PLUGIN_VERSION,
+			"godot_version": Engine.get_version_info(),
+		}
+	}
+	if _stdio_mode:
+		_send_stdout(payload)
+	else:
+		_send_tcp(payload)
 
 func _cmd_take_screenshot(params: Dictionary) -> Dictionary:
 	var path = params.get("path", "res://editor_screenshot.png")

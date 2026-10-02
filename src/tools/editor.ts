@@ -9,7 +9,7 @@
 
 import { z } from 'zod';
 import { ToolResult } from '../utils/types.js';
-import { ErrorCode, toolError, wrapError, plainError, editorCommandError } from '../utils/errors.js';
+import { ErrorCode, toolError, wrapError, plainError } from '../utils/errors.js';
 import { sendEditorCommand } from './editor_bridge.js';
 
 

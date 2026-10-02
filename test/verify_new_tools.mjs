@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const root = process.cwd();
-const project = await import(path.join(root, 'dist/tools/project.js'));
+await import(path.join(root, 'dist/tools/project.js'));
 const trans = await import(path.join(root, 'dist/tools/translation.js'));
 const presets = await import(path.join(root, 'dist/tools/export_presets.js'));
 
