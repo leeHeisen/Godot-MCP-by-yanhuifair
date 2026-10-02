@@ -2,13 +2,13 @@
 
 # Godot MCP
 
-### 功能最完整的 Godot 引擎 MCP 服务器——**386 个工具**，让 AI 助手真正"上手"操作你的游戏项目。
+### 功能最完整的 Godot 引擎 MCP 服务器——**415 个工具**，让 AI 助手真正"上手"操作你的游戏项目。
 
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE.md)
 [![CI](https://github.com/yanhuifair/Godot-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/yanhuifair/Godot-MCP/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@yanhuifair/godot-mcp)](https://www.npmjs.com/package/@yanhuifair/godot-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@yanhuifair/godot-mcp)](https://www.npmjs.com/package/@yanhuifair/godot-mcp)
-[![Tools](https://img.shields.io/badge/tools-386-orange)](#全部工具列表)
+[![Tools](https://img.shields.io/badge/tools-415-orange)](#全部工具列表)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-green)](.)
 [![Godot](https://img.shields.io/badge/godot-4.x-blue)](https://godotengine.org)
 
@@ -24,9 +24,9 @@
 - 🎛️ **驱动实时编辑器** — 选择节点、连接信号、编写可视化着色器、烘焙光照贴图、设置断点、单步调试、运行与停止游戏。
 - ↩️ **每一次场景修改都可撤销** — 添加、删除、重命名、移动、重设父节点、复制、实例化，全部注册进 Godot 原生撤销栈。AI 改错了，**Ctrl+Z** 就能还原。
 - 🎮 **深入正在运行的游戏** — 检查实时场景树、调用方法、注入输入，**冻结游戏、逐帧步进、并对结果截图**。这是目前唯一能做到这一点的公开 Godot MCP。
-- 🔎 **规模化仍然好用** — `search_tools` 从 386 个工具中精准定位，`get_status` 直接告诉你哪些子系统已连接，每个错误都返回类型化错误码和修复建议。
+- 🔎 **规模化仍然好用** — `search_tools` 从 415 个工具中精准定位，`get_status` 直接告诉你哪些子系统已连接，每个错误都返回类型化错误码和修复建议。
 
-**386 个工具 · 30 个分类 · 22 种 AI 客户端 · 4 条通信路径 · 一条命令完成配置。**
+**415 个工具 · 37 个分类 · 22 种 AI 客户端 · 4 条通信路径 · 一条命令完成配置。**
 
 ```bash
 npx @yanhuifair/godot-mcp --enable-plugin -p .
@@ -44,7 +44,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 | | **Godot MCP** | 其他 Godot MCP 服务器 |
 |---|---|---|
-| **工具数量** | **386 个**，30 个分类 | 16 – 156 个 |
+| **工具数量** | **415 个**，37 个分类 | 16 – 156 个 |
 | **无需 Godot 运行** | ✅ 原生 `.tscn` / `.tres` / `.godot` 解析器 | ⚠️ 通常必须开着编辑器 |
 | **实时编辑器控制** | ✅ 140 个工具——运行、调试、断点、视口、烘焙 | 部分支持 |
 | **AI 修改可撤销** | ✅ **任何场景改动都能一次 Ctrl+Z 撤销**——原生 `EditorUndoRedoManager` 动作 | ❌ 改了就回不去 |
@@ -88,7 +88,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 | 需要准备 | 怎么确认 |
 |---|---|
-| **Godot 4.x** | 打开 Godot，标题栏会显示版本号。*（不支持 Godot 3）* |
+| **Godot 4.5+** | 打开 Godot，标题栏会显示版本号。*（不支持 Godot 3；编辑器插件要求 4.5+，3D 吸附查询要求 4.6+，低版本会返回明确的能力错误而不是崩溃）* |
 | **Node.js 18 或更高** | 终端里执行 `node -v`。若提示 `command not found`，去 [nodejs.org](https://nodejs.org) 安装。 |
 | **一个支持 MCP 的 AI 客户端** | VS Code + Copilot、Cursor、Claude Desktop、Windsurf、Cline……[完整列表在这里](#配置-ai-客户端)。 |
 
@@ -115,7 +115,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 只有在你需要**实时编辑器**和**实时游戏**能力时才必须——比如运行场景、读取当前选中节点、打断点、烘焙光照贴图、冻结正在跑的游戏……
 
-386 个工具中有 **220 多个**（所有读写 `.tscn`、`.tres`、`.gd`、着色器、项目设置的工具）**不需要插件，甚至不需要打开 Godot** 就能用。如果这些已经够用，可以直接跳到第 2 步。
+415 个工具中有 **220 多个**（所有读写 `.tscn`、`.tres`、`.gd`、着色器、项目设置的工具）**不需要插件，甚至不需要打开 Godot** 就能用。如果这些已经够用，可以直接跳到第 2 步。
 </details>
 
 ### 第 2 步 —— 让 AI 客户端连上服务器
@@ -154,7 +154,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 "运行游戏并截图"
 ```
 
-386 个工具无法一次性全塞给 AI——当它不确定有哪些能力时，让它 **`search_tools`** 就行（例如："search_tools 搜一下 animation"）。
+415 个工具无法一次性全塞给 AI——当它不确定有哪些能力时，让它 **`search_tools`** 就行（例如："search_tools 搜一下 animation"）。
 
 <details>
 <summary>不工作？看这里</summary>
@@ -176,7 +176,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 ## 功能
 
-Godot MCP 通过 386 个工具、30 个分类，全面覆盖 Godot 4.x 引擎。
+Godot MCP 通过 415 个工具、37 个分类，全面覆盖 Godot 4.5+ 引擎。
 
 ### 快速演示
 
@@ -226,8 +226,15 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 | 元信息 / 内省 | 2 | 工具搜索（search_tools）+ 系统诊断（get_status） |
 | 日志 | 5 | 读取游戏运行日志（user://logs/godot.log）、轮转列表、清理、定位用户数据目录、配置文件日志 |
 | 运行时（游戏） | 11 | 控制正在运行的游戏——场景树、属性、方法、信号、输入、冻结/步进、截图 |
+| Leeheisen：UI | 13 | Control/UI 构建——根节点、标签、按钮、面板、容器、纹理、布局、主题、信号 |
+| Leeheisen：C# / .NET | 4 | .csproj 信息、C# 脚本模板、`dotnet build` 验证、编译错误 |
+| Leeheisen：脚本与场景工具 | 4 | 脚本补丁、PackedScene 抽取、项目 skills、性能快照 |
+| Leeheisen：断言 | 3 | 节点/属性/信号断言，闭环验证改动 |
+| Leeheisen：工程地图 | 2 | 全工程地图（JSON/HTML）与场景复杂度评分 |
+| Leeheisen：重构 | 2 | 预演 + 显式确认的跨文件脚本重构（写 `.bak` 备份） |
+| Leeheisen：运行时事件 | 1 | 运行中游戏的采样事件历史（节点增删、属性变化） |
 
-**总计：386 个工具，30 个分类**
+**总计：415 个工具，37 个分类**
 
 ### 核心能力详解
 
@@ -284,7 +291,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
   |   Claude 等)     |                                        |                  |
   +-----------------+                                        |  +-------------+ |
                                                              |  | 工具注册表    | |
-                                                             |  |  (386 工具)  | |
+                                                             |  |  (415 工具)  | |
                                                              |  +------+------+ |
                                                              |         |        |
                                                              |    +----v-----+  |
@@ -326,7 +333,7 @@ godot-mcp/
 │   ├── index.ts              # CLI 入口点，参数解析，传输调度
 │   ├── server.ts             # MCP 服务器工厂，工具注册，请求路由
 │   ├── tools/                # 工具处理文件（按分类分组）
-│   │   ├── register.ts       # 集中注册（386 个工具）
+│   │   ├── register.ts       # 集中注册（415 个工具）
 │   │   ├── project.ts        # 项目管理工具
 │   │   ├── scene.ts          # 场景编辑工具
 │   │   ├── script.ts         # 脚本和着色器工具
@@ -583,7 +590,7 @@ node dist/index.js -p /path/to/your/godot/project
 | 服务器版本 | `npx @yanhuifair/godot-mcp --version` | 一个版本号（如 `1.12.3`） |
 | 插件文件 | 看 `addons/godot-mcp/` 目录 | 有 `plugin.cfg`、`plugin.gd`、`runtime_bridge.gd` |
 | 插件已启用 | 打开 `project.godot` | `[editor_plugins]` 里有 `enabled = PackedStringArray("res://addons/godot-mcp/plugin.cfg")` |
-| 服务器能启动 | `npx @yanhuifair/godot-mcp -p .`（Ctrl+C 结束） | 打印工具数量，如 `386 tools` |
+| 服务器能启动 | `npx @yanhuifair/godot-mcp -p .`（Ctrl+C 结束） | 打印工具数量，如 `415 tools` |
 | 编辑器桥 | 在 Godot 里打开项目 | 输出台出现 `[Godot MCP] Plugin v… loaded — TCP on 127.0.0.1:9876` |
 
 **安装常见问题**
@@ -762,7 +769,7 @@ claude mcp add godot-mcp -e GODOT_PATH=/Applications/Godot.app/Contents/MacOS/Go
   -- npx -y @yanhuifair/godot-mcp -p .
 ```
 
-**第 3 步：验证。** 启动 `claude`，输入 `/mcp`。应该能看到 `godot-mcp` 显示为 **connected**，回车进去可以浏览全部 386 个工具。
+**第 3 步：验证。** 启动 `claude`，输入 `/mcp`。应该能看到 `godot-mcp` 显示为 **connected**，回车进去可以浏览全部 415 个工具。
 
 **第 4 步：第一条提示词：**
 
@@ -810,7 +817,7 @@ claude mcp remove godot-mcp  # 移除
 
 > 用 `search_tools` 找出瓦片地图相关的工具，然后告诉我这个项目里有哪些 TileSet。
 
-> **工具数量上限提醒：** Cursor 一次只会把大约 40–80 个工具发给模型，而 Godot MCP 有 386 个。请务必在规则文件里写上"先用 `search_tools`"（见[让你的 Agent 用好这些工具](#让你的-agent-用好这些工具)），否则模型会凭空编工具名。
+> **工具数量上限提醒：** Cursor 一次只会把大约 40–80 个工具发给模型，而 Godot MCP 有 415 个。请务必在规则文件里写上"先用 `search_tools`"（见[让你的 Agent 用好这些工具](#让你的-agent-用好这些工具)），否则模型会凭空编工具名。
 
 ---
 
@@ -913,7 +920,7 @@ gemini mcp add godot-mcp npx -y @yanhuifair/godot-mcp -p .
 ```
 
 - `trust: true` 会跳过每次调用的确认弹窗。方便，但也意味着 AI 可以不打招呼直接写文件——想要安全网就配合 `--read-only` 一起用。
-- `includeTools` / `excludeTools` 接受工具名数组，可以只把精选的一部分工具交给模型，而不是全部 386 个。
+- `includeTools` / `excludeTools` 接受工具名数组，可以只把精选的一部分工具交给模型，而不是全部 415 个。
 
 **第 2 步：验证。** 运行 `gemini`，输入 `/mcp` 查看已连接的服务器和工具。会话外可以用 `gemini mcp list`。
 
@@ -1125,7 +1132,7 @@ Zed 把 MCP 服务器叫做 **context server**，所以字段是 `context_server
 两个 OpenCode 专有的坑：
 
 - `command` 是**一个数组**，没有单独的 `args` 字段。
-- 工具发现的 `timeout` 默认只有 **5000 毫秒**。要列出 386 个工具、外加首次冷启动 `npx` 下载，经常超时——按上面写成 `30000`，否则服务器会静默显示 0 个工具。
+- 工具发现的 `timeout` 默认只有 **5000 毫秒**。要列出 415 个工具、外加首次冷启动 `npx` 下载，经常超时——按上面写成 `30000`，否则服务器会静默显示 0 个工具。
 
 **第 2 步：验证。** 在该目录下启动 `opencode`，MCP 服务器会在启动时加载，工具名带 `godot-mcp_` 前缀。
 
@@ -1392,14 +1399,14 @@ npx -y @yanhuifair/godot-mcp -p /path/to/your/godot/project -t all --port 3000
 
 ### 让你的 Agent 用好这些工具
 
-386 个工具超出了大多数模型能同时记住的量，而且不少客户端只会把其中一部分转发给模型。花两分钟做下面两件事就能解决。
+415 个工具超出了大多数模型能同时记住的量，而且不少客户端只会把其中一部分转发给模型。花两分钟做下面两件事就能解决。
 
 **1. 在项目里放一个规则文件。** 各家 Agent 会自动读取这些文件：`AGENTS.md`（Codex、OpenCode、Cursor、Gemini CLI、Zed）、`CLAUDE.md`（Claude Code）、`.cursor/rules/*.mdc`（Cursor）、`.clinerules`（Cline / Roo Code）、`.github/copilot-instructions.md`（Copilot）。
 
 ```markdown
 ## Godot MCP
 
-本项目已接入 `godot-mcp` 服务器（386 个工具）。
+本项目已接入 `godot-mcp` 服务器（415 个工具）。
 
 - 不要凭记忆猜工具名。先用关键词调用 `search_tools`，
   例如 search_tools("tileset")、search_tools("animation")、search_tools("navmesh")。
@@ -1423,7 +1430,7 @@ npx -y @yanhuifair/godot-mcp -p /path/to/your/godot/project -t all --port 3000
 **3. 两条值得背下来的提示词：**
 
 > `get_status` —— 当前能连上什么（编辑器？运行中的游戏？），加载了多少工具。
-> `search_tools("<关键词>")` —— 直接拿到排好序的正确工具名，不用把 386 条列表塞进上下文。
+> `search_tools("<关键词>")` —— 直接拿到排好序的正确工具名，不用把 415 条列表塞进上下文。
 
 ---
 
@@ -1651,7 +1658,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p /path/to/your/godot/project
 
 ### 工具发现与诊断（Meta，2 个工具）
 
-面对 386 个工具，盲目猜测名称会浪费大量 token。两个发现工具可提供帮助：
+面对 415 个工具，盲目猜测名称会浪费大量 token。两个发现工具可提供帮助：
 
 | 工具 | 描述 |
 |---|---|
@@ -2029,6 +2036,20 @@ npx @yanhuifair/godot-mcp --enable-plugin -p /path/to/your/godot/project
 
 **Other（4）：** `read_gdextension`、`list_csproj`、`create_world`、`read_texture_info`
 
+**Leeheisen：UI（13）：** `create_ui_root`、`create_control`、`create_label`、`create_button`、`create_panel`、`create_container`、`create_texture_rect`、`set_control_layout`、`set_control_size_flags`、`set_control_text`、`set_control_theme_override`、`set_control_texture`、`connect_node_signal`
+
+**Leeheisen：C# / .NET（4）：** `get_dotnet_project_info`、`create_csharp_script`、`validate_csharp_project`、`get_csharp_errors`
+
+**Leeheisen：脚本与场景工具（4）：** `patch_script`、`create_packed_scene_from_node`、`generate_project_skills`、`get_performance_snapshot`
+
+**Leeheisen：断言（3）：** `assert_node_exists`、`assert_node_property`、`assert_signal_connected`
+
+**Leeheisen：工程地图（2）：** `map_project`、`analyze_scene_complexity`
+
+**Leeheisen：重构（2）：** `plan_script_refactor`、`apply_script_refactor`
+
+**Leeheisen：运行时事件（1）：** `get_runtime_events`
+
 </details>
 
 ---
@@ -2133,8 +2154,8 @@ code --install-extension godot-mcp-1.12.3.vsix
 **支持哪些 AI 客户端？**
 任何兼容 MCP 的客户端。已验证：Claude Desktop、Claude Code、Cursor、VS Code（Copilot）、Windsurf、Codex、Cline、Roo Code、Aider、Cody、Goose、Continue。
 
-**AI 怎么从 386 个工具里挑对的那个？**
-用 `search_tools`——它按关键词对工具名和描述排序检索，AI 无需把 386 个 schema 全塞进上下文就能找到 `add_audio_bus_effect` 这样的工具。`get_status` 则报告当前哪些子系统（编辑器桥、游戏运行时）可达。
+**AI 怎么从 415 个工具里挑对的那个？**
+用 `search_tools`——它按关键词对工具名和描述排序检索，AI 无需把 415 个 schema 全塞进上下文就能找到 `add_audio_bus_effect` 这样的工具。`get_status` 则报告当前哪些子系统（编辑器桥、游戏运行时）可达。
 
 **运行时工具和编辑器工具有什么区别？**
 编辑器工具与 Godot **编辑器**通信；运行时工具通过 `127.0.0.1:9877` 上的轻量 autoload 与**正在运行的游戏**通信。正因如此才能冻结游戏、精确步进指定帧数、并截取某个精确的玩法瞬间。

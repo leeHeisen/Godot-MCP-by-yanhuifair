@@ -6,6 +6,9 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 config_version = 5
+[dotnet]
+
+project/assembly_name = "test"
 [animation]
 compatibility/default_parent_skeleton_in_mesh_instance_3d = true
 [application]

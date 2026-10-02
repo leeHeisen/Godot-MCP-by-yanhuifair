@@ -2,13 +2,13 @@
 
 # Godot MCP
 
-### The most complete MCP server for Godot Engine — **386 tools** that give your AI assistant real hands inside your game project.
+### The most complete MCP server for Godot Engine — **415 tools** that give your AI assistant real hands inside your game project.
 
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE.md)
 [![CI](https://github.com/yanhuifair/Godot-MCP/actions/workflows/ci.yml/badge.svg)](https://github.com/yanhuifair/Godot-MCP/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@yanhuifair/godot-mcp)](https://www.npmjs.com/package/@yanhuifair/godot-mcp)
 [![npm downloads](https://img.shields.io/npm/dm/@yanhuifair/godot-mcp)](https://www.npmjs.com/package/@yanhuifair/godot-mcp)
-[![Tools](https://img.shields.io/badge/tools-386-orange)](#all-tools)
+[![Tools](https://img.shields.io/badge/tools-415-orange)](#all-tools)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-green)](.)
 [![Godot](https://img.shields.io/badge/godot-4.x-blue)](https://godotengine.org)
 
@@ -24,9 +24,9 @@
 - 🎛️ **Drives the live editor** — select nodes, connect signals, author visual shaders, bake lightmaps, set breakpoints, step the debugger, run and stop the game.
 - ↩️ **Every scene edit is undoable** — add, remove, rename, move, reparent, duplicate and instantiate all register on Godot's native undo stack. If the AI gets it wrong, **Ctrl+Z** puts it back.
 - 🎮 **Reaches inside the running game** — inspect the live scene tree, call methods, inject input, **freeze the game, step it one frame at a time, and screenshot the result.** No other public Godot MCP does this.
-- 🔎 **Stays usable at scale** — `search_tools` finds the right tool out of 386, `get_status` tells you exactly what is connected, and every error returns a typed code plus a repair hint.
+- 🔎 **Stays usable at scale** — `search_tools` finds the right tool out of 415, `get_status` tells you exactly what is connected, and every error returns a typed code plus a repair hint.
 
-**386 tools · 30 categories · 22 AI clients · 4 communication paths · one-command setup.**
+**415 tools · 37 categories · 22 AI clients · 4 communication paths · one-command setup.**
 
 ```bash
 npx @yanhuifair/godot-mcp --enable-plugin -p .
@@ -44,7 +44,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 | | **Godot MCP** | Other Godot MCP servers |
 |---|---|---|
-| **Tool count** | **386** across 30 categories | 16 – 156 |
+| **Tool count** | **415** across 37 categories | 16 – 156 |
 | **Works without Godot running** | ✅ Native `.tscn` / `.tres` / `.godot` parsers | ⚠️ Usually needs a live editor |
 | **Live editor control** | ✅ 140 tools — play, debug, breakpoints, viewport, bake | Partial |
 | **Undoable AI edits** | ✅ **Every scene mutation is one Ctrl+Z away** — native `EditorUndoRedoManager` actions | ❌ Edits are permanent |
@@ -88,7 +88,7 @@ If you have ever wanted to say *"run the game, freeze it at the moment the playe
 
 | You need | How to check |
 |---|---|
-| **Godot 4.x** installed | Open Godot → the version shows in the title bar. *(Godot 3 is not supported.)* |
+| **Godot 4.5+** installed | Open Godot → the version shows in the title bar. *(Godot 3 is not supported. The editor plugin needs 4.5+; 3D-snap queries need 4.6+ and otherwise report a clear capability error.)* |
 | **Node.js 18 or newer** | Run `node -v` in a terminal. If it says `command not found`, install from [nodejs.org](https://nodejs.org). |
 | **An MCP-capable AI client** | VS Code + Copilot, Cursor, Claude Desktop, Windsurf, Cline… see [the full list](#ai-client-configuration). |
 
@@ -115,7 +115,7 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 
 Only if you want the **live editor** and **live game** tools (play the scene, read the current selection, set breakpoints, bake lightmaps, freeze the running game…).
 
-Over **220 of the 386 tools** — everything that reads and writes `.tscn`, `.tres`, `.gd`, shaders, project settings, etc. — work **without the plugin and without Godot even being open**. If that's all you need, skip to Step 2.
+Over **220 of the 415 tools** — everything that reads and writes `.tscn`, `.tres`, `.gd`, shaders, project settings, etc. — work **without the plugin and without Godot even being open**. If that's all you need, skip to Step 2.
 </details>
 
 ### Step 2 — Point Your AI Client at the Server
@@ -154,7 +154,7 @@ You should get back the tool count and whether the editor / runtime bridges are 
 "Run the game and take a screenshot"
 ```
 
-With 386 tools, the AI can't see them all at once — tell it to **`search_tools`** when it isn't sure what's available (e.g. *"search_tools for animation"*).
+With 415 tools, the AI can't see them all at once — tell it to **`search_tools`** when it isn't sure what's available (e.g. *"search_tools for animation"*).
 
 <details>
 <summary>Something not working?</summary>
@@ -176,7 +176,7 @@ With 386 tools, the AI can't see them all at once — tell it to **`search_tools
 
 ## What You Can Do
 
-Godot MCP provides comprehensive coverage of the Godot 4.x engine through 386 tools in 30 categories.
+Godot MCP provides comprehensive coverage of the Godot 4.5+ engine through 415 tools in 37 categories.
 
 ### Quick Demo
 
@@ -226,8 +226,15 @@ npx @yanhuifair/godot-mcp --enable-plugin -p .
 | Meta / Introspection | 2 | Tool search (search_tools) + system diagnostics (get_status) |
 | Logs | 5 | Read game-run logs (`user://logs/godot.log`), list/rotate, clear, locate user-data dir, configure file logging |
 | Runtime (game) | 11 | Control the running game — tree, properties, methods, signals, input, freeze/step, screenshot |
+| Leeheisen: UI | 13 | Control/UI construction — roots, labels, buttons, panels, containers, textures, layout, theme, signals |
+| Leeheisen: C# / .NET | 4 | .csproj info, C# script templates, `dotnet build` validation, compiler errors |
+| Leeheisen: Script & Scene Utilities | 4 | Script patching, PackedScene extraction, project skills, performance snapshot |
+| Leeheisen: Assertions | 3 | Node / property / signal assertions for closing the edit-verify loop |
+| Leeheisen: Project Map | 2 | Whole-project map (JSON/HTML) and scene complexity scoring |
+| Leeheisen: Refactor | 2 | Dry-run + confirmed project-wide script refactors with `.bak` backups |
+| Leeheisen: Runtime Events | 1 | Sampled running-game event history (node add/remove, property changes) |
 
-**Total: 386 tools across 30 categories**
+**Total: 415 tools across 37 categories**
 
 ### Core Capabilities in Detail
 
@@ -284,7 +291,7 @@ Inspect TileSet resources and TileMapLayer nodes. List and read NavigationRegion
   |   Claude/etc.)   |                                        |                  |
   +-----------------+                                        |  +-------------+ |
                                                              |  | Tool Registry| |
-                                                             |  |  (386 tools) | |
+                                                             |  |  (415 tools) | |
                                                              |  +------+------+ |
                                                              |         |        |
                                                              |    +----v-----+  |
@@ -326,7 +333,7 @@ godot-mcp/
 │   ├── index.ts              # CLI entry point, argument parsing, transport dispatch
 │   ├── server.ts             # MCP server factory, tool registration, request routing
 │   ├── tools/                # tool handler files (one group per category)
-│   │   ├── register.ts       # Centralized registration (386 tools)
+│   │   ├── register.ts       # Centralized registration (415 tools)
 │   │   ├── project.ts        # Project management tools
 │   │   ├── scene.ts          # Scene editing tools
 │   │   ├── script.ts         # Script and shader tools
@@ -588,7 +595,7 @@ After any install method, confirm everything is in place:
 | Server version | `npx @yanhuifair/godot-mcp --version` | A version number (e.g. `1.12.3`) |
 | Plugin files | Look in `addons/godot-mcp/` | `plugin.cfg`, `plugin.gd`, `runtime_bridge.gd` |
 | Plugin enabled | Open `project.godot` | `[editor_plugins]` has `enabled = PackedStringArray("res://addons/godot-mcp/plugin.cfg")` |
-| Server starts | `npx @yanhuifair/godot-mcp -p .` (Ctrl+C to stop) | Prints the tool count, e.g. `386 tools` |
+| Server starts | `npx @yanhuifair/godot-mcp -p .` (Ctrl+C to stop) | Prints the tool count, e.g. `415 tools` |
 | Editor bridge | Open the project in Godot | Output log shows `[Godot MCP] Plugin v… loaded — TCP on 127.0.0.1:9876` |
 
 **Install troubleshooting**
@@ -767,7 +774,7 @@ claude mcp add godot-mcp -e GODOT_PATH=/Applications/Godot.app/Contents/MacOS/Go
   -- npx -y @yanhuifair/godot-mcp -p .
 ```
 
-**3. Verify.** Start `claude`, then type `/mcp`. You should see `godot-mcp` with a **connected** status. Press Enter on it to browse the 386 tools.
+**3. Verify.** Start `claude`, then type `/mcp`. You should see `godot-mcp` with a **connected** status. Press Enter on it to browse the 415 tools.
 
 **4. First prompt:**
 
@@ -815,7 +822,7 @@ You can also let Cursor create the file for you: **Settings → Tools & Integrat
 
 > Use `search_tools` to find the tileset tools, then tell me which TileSets exist in this project.
 
-> **Tool limit warning:** Cursor only sends ~40–80 tools to the model at a time. Godot MCP ships 386. Keep `search_tools` in your rules file (see [Make Your Agent Use the Tools Well](#make-your-agent-use-the-tools-well)) so the model looks a tool up instead of hallucinating one.
+> **Tool limit warning:** Cursor only sends ~40–80 tools to the model at a time. Godot MCP ships 415. Keep `search_tools` in your rules file (see [Make Your Agent Use the Tools Well](#make-your-agent-use-the-tools-well)) so the model looks a tool up instead of hallucinating one.
 
 ---
 
@@ -918,7 +925,7 @@ Equivalent hand-written config:
 ```
 
 - `trust: true` skips the per-call confirmation prompt. Convenient, but it also means the AI can write files without asking — pair it with `--read-only` if you want a safety net.
-- `includeTools` / `excludeTools` accept arrays of tool names if you want to hand the model a curated subset instead of all 386.
+- `includeTools` / `excludeTools` accept arrays of tool names if you want to hand the model a curated subset instead of all 415.
 
 **2. Verify.** Run `gemini`, then `/mcp` — it lists connected servers and their tools. `gemini mcp list` works outside a session.
 
@@ -1130,7 +1137,7 @@ If your IDE launches processes without your shell's `PATH`, replace `"npx"` with
 Two OpenCode-specific gotchas:
 
 - `command` is a **single array**, not `command` + `args`.
-- The default tool-discovery `timeout` is **5000 ms**. Listing 386 tools plus a cold `npx` download regularly blows past that — bump it to `30000` as shown or the server will silently show zero tools.
+- The default tool-discovery `timeout` is **5000 ms**. Listing 415 tools plus a cold `npx` download regularly blows past that — bump it to `30000` as shown or the server will silently show zero tools.
 
 **2. Verify.** Start `opencode` in that folder. The MCP server appears at startup; tools are namespaced `godot-mcp_*`.
 
@@ -1397,14 +1404,14 @@ See [Transport Modes](#transport-modes) for the full details.
 
 ### Make Your Agent Use the Tools Well
 
-386 tools is more than most models can keep straight, and many clients only forward a slice of them to the model. Two minutes of setup fixes this.
+415 tools is more than most models can keep straight, and many clients only forward a slice of them to the model. Two minutes of setup fixes this.
 
 **1. Drop a rules file in your project.** Agents auto-read these: `AGENTS.md` (Codex, OpenCode, Cursor, Gemini CLI, Zed), `CLAUDE.md` (Claude Code), `.cursor/rules/*.mdc` (Cursor), `.clinerules` (Cline / Roo Code), `.github/copilot-instructions.md` (Copilot).
 
 ```markdown
 ## Godot MCP
 
-This project has the `godot-mcp` server attached (386 tools).
+This project has the `godot-mcp` server attached (415 tools).
 
 - Never guess a tool name. Call `search_tools` with a keyword first —
   e.g. search_tools("tileset"), search_tools("animation"), search_tools("navmesh").
@@ -1428,7 +1435,7 @@ This project has the `godot-mcp` server attached (386 tools).
 **3. Two prompts worth memorizing:**
 
 > `get_status` — what is currently reachable (editor? running game?) and how many tools are loaded.
-> `search_tools("<keyword>")` — the right tool name, ranked, without burning context on a 386-item list.
+> `search_tools("<keyword>")` — the right tool name, ranked, without burning context on a 415-item list.
 
 ---
 
@@ -1656,7 +1663,7 @@ If the runtime tools return a `RUNTIME_NOT_REACHABLE` error, run `get_status` �
 
 ### Tool Discovery & Diagnostics (Meta, 2 tools)
 
-With 386 tools, guessing the right name wastes tokens. Two discovery tools help:
+With 415 tools, guessing the right name wastes tokens. Two discovery tools help:
 
 | Tool | Description |
 |---|---|
@@ -2034,6 +2041,20 @@ Click each category to expand and see all tools with descriptions.
 
 **Other (4):** `read_gdextension`, `list_csproj`, `create_world`, `read_texture_info`
 
+**Leeheisen: UI (13):** `create_ui_root`, `create_control`, `create_label`, `create_button`, `create_panel`, `create_container`, `create_texture_rect`, `set_control_layout`, `set_control_size_flags`, `set_control_text`, `set_control_theme_override`, `set_control_texture`, `connect_node_signal`
+
+**Leeheisen: C# / .NET (4):** `get_dotnet_project_info`, `create_csharp_script`, `validate_csharp_project`, `get_csharp_errors`
+
+**Leeheisen: Script & Scene Utilities (4):** `patch_script`, `create_packed_scene_from_node`, `generate_project_skills`, `get_performance_snapshot`
+
+**Leeheisen: Assertions (3):** `assert_node_exists`, `assert_node_property`, `assert_signal_connected`
+
+**Leeheisen: Project Map (2):** `map_project`, `analyze_scene_complexity`
+
+**Leeheisen: Refactor (2):** `plan_script_refactor`, `apply_script_refactor`
+
+**Leeheisen: Runtime Events (1):** `get_runtime_events`
+
 </details>
 
 ---
@@ -2138,8 +2159,8 @@ No. Godot **4.x** only. Godot 3's file formats and editor APIs differ too much t
 **Which AI clients work with it?**
 Any MCP-compatible client. Verified with Claude Desktop, Claude Code, Cursor, VS Code (Copilot), Windsurf, Codex, Cline, Roo Code, Aider, Cody, Goose, and Continue.
 
-**How does the AI pick the right tool out of 386?**
-Use `search_tools` — it ranks the catalog by keyword against tool names and descriptions, so the AI can find `add_audio_bus_effect` without loading all 386 schemas into context. `get_status` reports which subsystems (editor bridge, game runtime) are currently reachable.
+**How does the AI pick the right tool out of 415?**
+Use `search_tools` — it ranks the catalog by keyword against tool names and descriptions, so the AI can find `add_audio_bus_effect` without loading all 415 schemas into context. `get_status` reports which subsystems (editor bridge, game runtime) are currently reachable.
 
 **What makes the runtime tools different from the editor tools?**
 Editor tools talk to the Godot **editor**. Runtime tools talk to the **running game** through a lightweight autoload on `127.0.0.1:9877`. That's what enables freezing the game, stepping an exact number of frames, and screenshotting a precise gameplay moment.

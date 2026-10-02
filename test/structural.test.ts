@@ -320,10 +320,12 @@ describe('WRITE_TOOLS 名单完整性', () => {
   it('所有已注册工具都以已知前缀分类（写/读互斥无冲突）', async () => {
     const { WRITE_TOOLS } = await import('../src/utils/registry.js');
     const { registerAllTools } = await import('../src/tools/register.js');
+    const { registerLeeheisenTools } = await import('../src/tools/leeheisen/register.js');
     const { ToolRegistry } = await import('../src/utils/registry.js');
 
     const registry = new ToolRegistry();
     registerAllTools(registry);
+    registerLeeheisenTools(registry);
     const names = registry.list().map((t) => t.name);
 
     // 注册列表在非只读模式下应包含全部工具
@@ -338,10 +340,12 @@ describe('WRITE_TOOLS 名单完整性', () => {
   it('明显写前缀的工具必须列入 WRITE_TOOLS（防漏）', async () => {
     const { WRITE_TOOLS } = await import('../src/utils/registry.js');
     const { registerAllTools } = await import('../src/tools/register.js');
+    const { registerLeeheisenTools } = await import('../src/tools/leeheisen/register.js');
     const { ToolRegistry } = await import('../src/utils/registry.js');
 
     const registry = new ToolRegistry();
     registerAllTools(registry);
+    registerLeeheisenTools(registry);
     const names = registry.list().map((t) => t.name);
 
     // 写前缀：以这些词开头的工具几乎必然是写/副作用操作。
@@ -480,8 +484,17 @@ describe('文档与注册表一致性', () => {
 
   /** 注册表的真实工具数——所有文档声明都必须与它相等。 */
   async function registryCount(): Promise<number> {
-    const src = fs.readFileSync(path.join(repoRoot, 'src', 'tools', 'register.ts'), 'utf-8');
-    return [...src.matchAll(/name:\s*'([a-z0-9_]+)'/g)].length;
+    // 上游工具在 src/tools/register.ts，Leeheisen 移植工具在
+    // src/tools/leeheisen/register.ts（server.ts 里单独注册）。
+    // 文档声明的是「服务器实际提供的工具数」，两者都要计入。
+    const sources = [
+      path.join(repoRoot, 'src', 'tools', 'register.ts'),
+      path.join(repoRoot, 'src', 'tools', 'leeheisen', 'register.ts'),
+    ];
+    return sources.reduce((total, file) => {
+      const src = fs.readFileSync(file, 'utf-8');
+      return total + [...src.matchAll(/name:\s*'([a-z0-9_]+)'/g)].length;
+    }, 0);
   }
 
   /** 解析 README 的「功能概览 / Feature Overview」表：行数 + 工具数求和。 */
