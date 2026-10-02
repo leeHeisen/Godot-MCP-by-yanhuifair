@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — .tscn file mutation helpers
@@ -8,13 +9,19 @@
 // ResourceSaver, load()) are NOT reachable from it. Rather than patch plugin.gd
 // (upstream merge risk), the few tools that need resource-level work go through
 // the .tscn on disk and ask the editor to reload.
+//
+// All writes are raw-text edits (see scene_text.ts). The shared serializeScene()
+// round-trip is deliberately NOT used for writes: it mangles instanced nodes and
+// drops `[editable]` / `unique_id` metadata.
 // ============================================================
 
 import fs from 'node:fs';
-import { ExtResource, GodotDocument, NodeDefinition } from '../../utils/types.js';
+import { ExtResource, GodotDocument } from '../../utils/types.js';
 import { resolveProjectPath, readTextFile, writeTextFile } from '../../utils/file_utils.js';
-import { parseScene, serializeScene } from '../../parsers/scene_parser.js';
+import { parseScene } from '../../parsers/scene_parser.js';
 import { editorCall, stripResPrefix, toPosix } from './common.js';
+
+export { collectSceneNodes, findSceneNode } from './scene_text.js';
 
 /** Path of the scene currently open in the editor, as `res://...`, or null. */
 export async function getOpenScenePath(): Promise<string | null> {
@@ -34,7 +41,7 @@ export function readScene(projectRoot: string, sceneRel: string): { doc: GodotDo
 }
 
 /**
- * Rewrite a scene file, then resync the editor.
+ * Write already-edited scene text back to disk, then resync the editor.
  *
  * Two plugin behaviours force this shape (both verified against a live Godot
  * 4.7.2 editor, and neither is something the port is allowed to fix upstream):
@@ -48,11 +55,11 @@ export function readScene(projectRoot: string, sceneRel: string): { doc: GodotDo
 export async function applySceneFileEdit(
   projectRoot: string,
   sceneRel: string,
-  doc: GodotDocument
+  content: string
 ): Promise<{ editor_resynced: boolean; absPath: string }> {
   const rel = stripResPrefix(sceneRel);
   const absPath = resolveProjectPath(projectRoot, rel);
-  writeTextFile(absPath, serializeScene(doc), true);
+  writeTextFile(absPath, content, true);
 
   const openScene = await getOpenScenePath();
   const openRel = openScene ? stripResPrefix(openScene) : '';
@@ -60,7 +67,7 @@ export async function applySceneFileEdit(
     return { editor_resynced: false, absPath };
   }
 
-  let closed = false;
+  let closed: boolean;
   try {
     const r = await editorCall('close_scene', {});
     closed = r?.closed === true;
@@ -84,40 +91,6 @@ export async function saveOpenScene(): Promise<void> {
   } catch {
     // No open scene / no unsaved state — nothing to flush.
   }
-}
-
-// ---- node lookup ----
-
-export interface LocatedNode {
-  node: NodeDefinition;
-  path: string;
-  parentPath: string | undefined;
-}
-
-/**
- * Walk the scene hierarchy collecting Godot-style root-relative paths, i.e. the
- * exact convention the editor tools use: "." for the root, "LeeUI" for a direct
- * child, "LeeUI/LeeBox" for a grandchild. (The .tscn `parent=` / `from=` fields
- * use the same convention, which is what makes file lookups line up.)
- */
-export function collectSceneNodes(doc: GodotDocument): LocatedNode[] {
-  const out: LocatedNode[] = [];
-  const walk = (nodes: NodeDefinition[], parentPath: string) => {
-    for (const node of nodes) {
-      const path = parentPath === '' ? '.' : parentPath === '.' ? node.name : `${parentPath}/${node.name}`;
-      out.push({ node, path, parentPath: parentPath === '' ? undefined : parentPath });
-      walk(node.children, path);
-    }
-  };
-  walk(doc.nodes, '');
-  return out;
-}
-
-export function findSceneNode(doc: GodotDocument, nodePath: string): LocatedNode | null {
-  const wanted = (nodePath || '').trim().replace(/^\.\//, '');
-  const nodes = collectSceneNodes(doc);
-  if (wanted === '' || wanted === '.' || wanted === '/') return nodes[0] ?? null;
-  return nodes.find((n) => n.path === wanted) ?? null;
 }
 
 // ---- extension resources ----
@@ -146,65 +119,6 @@ export function addExtResource(doc: GodotDocument, type: string, resPath: string
   return ext;
 }
 
-// ---- subtree extraction ----
-
-function propertyTextOf(node: NodeDefinition): string {
-  const parts: string[] = [node.instance ?? ''];
-  for (const value of Object.values(node.properties)) parts.push(String(value));
-  return parts.join('\n');
-}
-
-/**
- * Build a new scene containing only `nodePath` and its descendants, keeping
- * just the ext/sub resources the subtree actually references.
- */
-export function extractSubtree(doc: GodotDocument, nodePath: string): { doc: GodotDocument; rootPath: string } {
-  const located = findSceneNode(doc, nodePath);
-  if (!located) throw new Error(`Node not found: ${nodePath}`);
-  const rootPath = located.path;
-
-  const subtreeText: string[] = [];
-  const collect = (node: NodeDefinition) => {
-    subtreeText.push(propertyTextOf(node));
-    for (const child of node.children) collect(child);
-  };
-  collect(located.node);
-  const text = subtreeText.join('\n');
-
-  const extIds = new Set([...text.matchAll(/ExtResource\("([^"]+)"\)/g)].map((m) => m[1]));
-  const subIds = new Set([...text.matchAll(/SubResource\("([^"]+)"\)/g)].map((m) => m[1]));
-
-  const rewritePath = (p: string): string | null => {
-    if (p === rootPath) return '.';
-    if (rootPath === '.') return p;
-    if (p.startsWith(`${rootPath}/`)) return p.slice(rootPath.length + 1);
-    return null;
-  };
-
-  const connections = doc.connections
-    .map((c) => {
-      const from = rewritePath(c.from);
-      const to = rewritePath(c.to);
-      if (from === null || to === null) return null;
-      return { ...c, from, to };
-    })
-    .filter((c): c is GodotDocument['connections'][number] => c !== null);
-
-  // The extracted root keeps its children but loses its position among siblings.
-  const rootClone: NodeDefinition = { ...located.node, index: undefined };
-
-  return {
-    rootPath,
-    doc: {
-      header: { format: doc.header.format ?? 3, uid: '', load_steps: undefined },
-      extResources: doc.extResources.filter((e) => extIds.has(e.id)),
-      subResources: doc.subResources.filter((s) => subIds.has(s.id)),
-      nodes: [rootClone],
-      connections,
-    },
-  };
-}
-
 /** True when a scene file exists on disk. */
 export function sceneExists(projectRoot: string, sceneRel: string): boolean {
   try {
@@ -212,24 +126,4 @@ export function sceneExists(projectRoot: string, sceneRel: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * Append a `[connection]` entry, returning false when an identical one already
- * exists. Written file-side because the plugin's editor-based connect never
- * marks the scene dirty, so the connection is lost on the next save/reopen.
- */
-export function addConnection(
-  doc: GodotDocument,
-  from: string,
-  signal: string,
-  to: string,
-  method: string
-): boolean {
-  const exists = doc.connections.some(
-    (c) => c.from === from && c.signal === signal && c.to === to && c.method === method
-  );
-  if (exists) return false;
-  doc.connections.push({ signal, from, to, method });
-  return true;
 }

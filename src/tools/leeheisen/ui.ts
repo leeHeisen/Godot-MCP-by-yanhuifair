@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — Control/UI construction toolchain (funplay parity)
@@ -15,8 +16,11 @@
 import { z } from 'zod';
 import { ErrorCode, isEditorCommandFailure } from '../../utils/errors.js';
 import { ToolResult } from '../../utils/types.js';
+import { resolveProjectPath, readTextFile } from '../../utils/file_utils.js';
+import { parseScene } from '../../parsers/scene_parser.js';
 import { editorCall, fail, okJson, readOnlyRefusal, stripResPrefix } from './common.js';
-import { addConnection, addExtResource, applySceneFileEdit, findSceneNode, getOpenScenePath, readScene, saveOpenScene } from './scene_files.js';
+import { allocateExtResourceId, applySceneFileEdit, findExtResourceByPath, getOpenScenePath, saveOpenScene } from './scene_files.js';
+import { addExtResourceToText, appendConnectionToText, findNodeBlock, setNodePropertyInText } from './scene_text.js';
 
 type PropMap = Record<string, string>;
 
@@ -65,15 +69,23 @@ async function assignTextureResource(
   const open = await getOpenScenePath();
   if (!open) throw new Error('No scene is open in the editor');
   const sceneRel = stripResPrefix(open);
-  const { doc } = readScene(projectRoot, sceneRel);
-  const located = findSceneNode(doc, nodePath);
-  if (!located) throw new Error(`Node not found in ${sceneRel}: ${nodePath}`);
+  const absPath = resolveProjectPath(projectRoot, sceneRel);
+  let content = readTextFile(absPath).content;
+  const doc = parseScene(content);
+  const block = findNodeBlock(content, doc, nodePath);
+  if (!block) throw new Error(`Node not found in ${sceneRel}: ${nodePath}`);
 
   const resPath = `res://${stripResPrefix(texturePath)}`;
-  const ext = addExtResource(doc, 'Texture2D', resPath);
-  located.node.properties[property] = `ExtResource("${ext.id}")`;
-  const { editor_resynced } = await applySceneFileEdit(projectRoot, sceneRel, doc);
-  return { scene: sceneRel, ext_id: ext.id, editor_resynced };
+  const existing = findExtResourceByPath(doc, resPath);
+  const extId = existing?.id ?? allocateExtResourceId(doc);
+  // Property first: inserting the ext_resource line later shifts node line
+  // numbers, which would invalidate the block reference.
+  content = setNodePropertyInText(content, block, property, `ExtResource("${extId}")`);
+  if (!existing) {
+    content = addExtResourceToText(content, { type: 'Texture2D', path: resPath, id: extId }).text;
+  }
+  const { editor_resynced } = await applySceneFileEdit(projectRoot, sceneRel, content);
+  return { scene: sceneRel, ext_id: extId, editor_resynced };
 }
 
 /** Godot Control.LayoutPreset → anchor_left/top/right/bottom. */
@@ -497,9 +509,15 @@ export async function handleConnectNodeSignal(projectRoot: string, args: any): P
     const from = String(args.from_node).replace(/^\.\//, '');
     const to = args.to_node ? String(args.to_node).replace(/^\.\//, '') : '.';
 
-    const { doc } = readScene(projectRoot, sceneRel);
-    const added = addConnection(doc, from, args.signal, to, String(args.method));
-    const { editor_resynced } = await applySceneFileEdit(projectRoot, sceneRel, doc);
+    const absPath = resolveProjectPath(projectRoot, sceneRel);
+    const content = readTextFile(absPath).content;
+    const { text, added } = appendConnectionToText(content, {
+      from,
+      signal: args.signal,
+      to,
+      method: String(args.method),
+    });
+    const { editor_resynced } = await applySceneFileEdit(projectRoot, sceneRel, text);
 
     return okJson({
       from,

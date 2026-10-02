@@ -1,4 +1,5 @@
-// Copyright (c) 2026 Leeheisen
+// Copyright (c) 2026 FairYan, Leeheisen
+// Ported from funplay-godot-mcp (MIT, Copyright (c) 2026 FunplayAI).
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // ============================================================
 // Leeheisen port — patch_script, PackedScene extraction, project skills,
@@ -11,7 +12,6 @@ import { z } from 'zod';
 import { ErrorCode, isEditorCommandFailure } from '../../utils/errors.js';
 import { ToolResult } from '../../utils/types.js';
 import { resolveProjectPath, readTextFile, writeTextFile } from '../../utils/file_utils.js';
-import { serializeScene } from '../../parsers/scene_parser.js';
 import {
   detectProjectLanguageMode,
   editorCall,
@@ -21,13 +21,8 @@ import {
   readOnlyRefusal,
   stripResPrefix,
 } from './common.js';
-import { extractSubtree, getOpenScenePath, readScene, saveOpenScene } from './scene_files.js';
-
-function countNodesIn(node: { children?: unknown[] }): number {
-  let total = 1;
-  for (const child of (node.children || []) as { children?: unknown[] }[]) total += countNodesIn(child);
-  return total;
-}
+import { getOpenScenePath, saveOpenScene } from './scene_files.js';
+import { extractSubtreeText } from './scene_text.js';
 
 // ---- patch_script ----
 
@@ -140,21 +135,23 @@ export async function handleCreatePackedSceneFromNode(
       sourceScene = stripResPrefix(open);
     }
 
-    const { doc } = readScene(projectRoot, sourceScene);
-    const extracted = extractSubtree(doc, nodePath);
+    // Raw-text extraction: a node subtree may contain instanced nodes or
+    // metadata the shared serializer does not model (see scene_text.ts).
+    const sourceText = readTextFile(resolveProjectPath(projectRoot, sourceScene)).content;
+    const extracted = extractSubtreeText(sourceText, nodePath);
     const absOut = resolveProjectPath(projectRoot, outputRel);
     fs.mkdirSync(path.dirname(absOut), { recursive: true });
-    writeTextFile(absOut, serializeScene(extracted.doc), false);
+    writeTextFile(absOut, extracted.text, false);
 
     return okJson({
       created: outputRel,
       source_scene: sourceScene,
       source_node: nodePath,
       extracted_root: extracted.rootPath,
-      node_count: countNodesIn(extracted.doc.nodes[0]),
-      ext_resources: extracted.doc.extResources.map((e) => ({ type: e.type, path: e.path })),
-      sub_resources: extracted.doc.subResources.length,
-      connections: extracted.doc.connections.length,
+      node_count: extracted.nodeCount,
+      ext_resources: extracted.extResources,
+      sub_resources: extracted.subResourceCount,
+      connections: extracted.connectionCount,
     });
   } catch (err: any) {
     if (isEditorCommandFailure(err)) {
