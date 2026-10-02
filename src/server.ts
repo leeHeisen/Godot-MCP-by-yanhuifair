@@ -19,6 +19,7 @@ import { findProjectRoot } from './utils/file_utils.js';
 import { ToolRegistry } from './utils/registry.js';
 import { ErrorCode, toolError } from './utils/errors.js';
 import { registerAllTools } from './tools/register.js';
+import { registerLeeheisenTools } from './tools/leeheisen/register.js';
 
 // ---- 共享资源 ----
 
@@ -38,6 +39,9 @@ export function initSharedResources(projectRoot?: string): { registry: ToolRegis
     const readOnly = process.env.GODOT_MCP_READ_ONLY === 'true';
     sharedRegistry = new ToolRegistry({ readOnly });
     registerAllTools(sharedRegistry);
+    // Leeheisen port: additive tools (src/tools/leeheisen/). Registered here
+    // instead of inside register.ts so upstream edits to that file don't clash.
+    registerLeeheisenTools(sharedRegistry);
   }
   if (sharedProjectRoot === undefined || sharedProjectRoot === null) {
     sharedProjectRoot = projectRoot || findProjectRoot() || null;

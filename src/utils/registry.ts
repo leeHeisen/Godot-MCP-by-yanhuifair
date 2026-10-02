@@ -120,6 +120,14 @@ export const WRITE_TOOLS: ReadonlySet<string> = new Set([
   'editor_set_tab_container_param', 'editor_set_video_player_param',
   'editor_set_viewport_param',
   'fix_missing_uids',
+  // ---- Leeheisen port (src/tools/leeheisen/) ----
+  'apply_script_refactor', 'create_csharp_script', 'validate_csharp_project',
+  'get_csharp_errors', 'patch_script', 'create_packed_scene_from_node',
+  'generate_project_skills',
+  'create_ui_root', 'create_control', 'create_label', 'create_button',
+  'create_panel', 'create_container', 'create_texture_rect',
+  'set_control_layout', 'set_control_size_flags', 'set_control_text',
+  'set_control_theme_override', 'set_control_texture', 'connect_node_signal',
 ]);
 
 /** 该工具是否为写/副作用操作（read-only 模式下应被拒绝）。 */
