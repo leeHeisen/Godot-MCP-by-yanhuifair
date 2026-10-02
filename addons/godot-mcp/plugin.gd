@@ -7,7 +7,7 @@ extends EditorPlugin
 # ============================================================
 # Godot MCP Editor Plugin v1.12.4
 # ============================================================
-# ⚠️  Godot 4.x only. Godot 3 is NOT supported.
+# ⚠️  Godot 4.5+ (minimum supported). Godot 3 is NOT supported.
 # Dual-mode communication with the MCP server:
 # - stdio mode: when spawned by MCP (MCP_STDIO=true), reads
 #   commands from stdin, writes responses to stdout.
@@ -24,6 +24,26 @@ const PLUGIN_VERSION = "1.12.4"
 
 # TCP 接收缓冲上限：超过且无完整行时丢弃，防止恶意客户端灌数据撑爆内存
 const TCP_BUFFER_LIMIT = 1024 * 1024
+
+# ============================================================
+# Version-gated EditorInterface access
+# ============================================================
+# A *direct* reference to an EditorInterface method the running engine does not
+# have is a GDScript PARSE error: the whole plugin then fails to load, port 9876
+# never opens and every editor tool dies. So every API newer than the oldest
+# supported engine (4.5) must be resolved by name at runtime.
+#
+# Verified missing in 4.5.x, hence guarded at the call sites below:
+#   get_editor_language, is_node_3d_snap_enabled,
+#   get_node_3d_translate_snap, get_node_3d_rotate_snap, get_node_3d_scale_snap
+func _editor_has(method: String) -> bool:
+	return EditorInterface.has_method(method)
+
+
+func _editor_call(method: String, fallback = null) -> Variant:
+	if not EditorInterface.has_method(method):
+		return fallback
+	return EditorInterface.call(method)
 
 var _output_buffer: PackedStringArray = []
 var _output_signal_connected: bool = false
@@ -1436,7 +1456,8 @@ func _cmd_get_editor_info() -> Dictionary:
 		"editor_width": rect.x,
 		"editor_height": rect.y,
 		"editor_scale": EditorInterface.get_editor_scale(),
-		"editor_language": EditorInterface.get_editor_language(),
+		# 4.6+; on 4.5 the key degrades to "" instead of failing.
+		"editor_language": _editor_call("get_editor_language", ""),
 		"distraction_free": EditorInterface.is_distraction_free_mode_enabled(),
 		"movie_maker": EditorInterface.is_movie_maker_enabled(),
 		"multi_window": EditorInterface.is_multi_window_enabled(),
@@ -1633,11 +1654,15 @@ func _cmd_set_movie_maker(params: Dictionary) -> Dictionary:
 
 
 func _cmd_get_3d_snap() -> Dictionary:
+	# 3D snap APIs are 4.6+. Report a capability error on older engines — the
+	# plugin itself must stay alive (a direct call here would be a parse error).
+	if not _editor_has("is_node_3d_snap_enabled"):
+		return {"error": "get_3d_snap requires Godot 4.6+ (EditorInterface 3D snap APIs are unavailable in this engine build)"}
 	return {
-		"snap_enabled": EditorInterface.is_node_3d_snap_enabled(),
-		"translate_snap": EditorInterface.get_node_3d_translate_snap(),
-		"rotate_snap": EditorInterface.get_node_3d_rotate_snap(),
-		"scale_snap": EditorInterface.get_node_3d_scale_snap(),
+		"snap_enabled": bool(_editor_call("is_node_3d_snap_enabled", false)),
+		"translate_snap": float(_editor_call("get_node_3d_translate_snap", 0.0)),
+		"rotate_snap": float(_editor_call("get_node_3d_rotate_snap", 0.0)),
+		"scale_snap": float(_editor_call("get_node_3d_scale_snap", 0.0)),
 	}
 
 
@@ -1645,7 +1670,7 @@ func _cmd_get_editor_paths() -> Dictionary:
 	var paths = EditorInterface.get_editor_paths()
 	var out := {
 		"editor_scale": EditorInterface.get_editor_scale(),
-		"editor_language": EditorInterface.get_editor_language(),
+		"editor_language": _editor_call("get_editor_language", ""),
 		"multi_window": EditorInterface.is_multi_window_enabled(),
 	}
 	if paths:

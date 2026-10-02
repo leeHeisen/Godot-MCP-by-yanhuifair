@@ -312,6 +312,33 @@ describe('GDScript Writer', () => {
   });
 });
 
+// ---- plugin.gd 版本门禁 ----
+// 直接引用运行引擎没有的 EditorInterface 方法是 GDScript **解析期**错误：
+// 整个 plugin.gd 会加载失败，9876 不监听，所有编辑器工具一起死（见 docs §12）。
+// 4.5 缺少这 5 个 API，必须走 _editor_call()/has_method 按名字动态调用。
+
+describe('plugin.gd 版本门禁', () => {
+  it('不直接调用 4.6+ 才有的 EditorInterface API（否则 Godot 4.5 整插件解析失败）', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const root = path.resolve(import.meta.dirname ?? process.cwd(), '..');
+    const src = fs.readFileSync(path.join(root, 'addons', 'godot-mcp', 'plugin.gd'), 'utf-8');
+
+    // 4.5.x 实测缺失（4.6 起才有）
+    const gatedAfter45 = [
+      'get_editor_language',
+      'is_node_3d_snap_enabled',
+      'get_node_3d_translate_snap',
+      'get_node_3d_rotate_snap',
+      'get_node_3d_scale_snap',
+    ];
+    const offenders = gatedAfter45.filter((m) =>
+      new RegExp(`EditorInterface\\.${m}\\s*\\(`).test(src)
+    );
+    expect(offenders, '这些调用必须改成 _editor_call("<name>", fallback)').toEqual([]);
+  });
+});
+
 // ---- READ-ONLY Write-Tool 名单完整性 ----
 // WRITE_TOOLS 白名单是 read-only 模式的唯一防线：漏列一个写工具 = 安全失效。
 // 本测试确保「以明显写前缀命名」的工具都在名单中，新增写类工具时必须同步加入。
